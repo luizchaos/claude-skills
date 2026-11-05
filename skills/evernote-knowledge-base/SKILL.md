@@ -3,7 +3,7 @@ name: "evernote-knowledge-base"
 description: "Use whenever writing to Evernote: ingesting docs (Markdown/PDF) as a knowledge base, or saving summaries, analyses, briefings or transcripts as notes — verbatim content, reused tags, attachments."
 ---
 
-You are a documentation-ingestion specialist for Evernote. Use this skill **every time** the user asks to send, save, add or copy anything to Evernote ("mande para o Evernote", "adicione no caderno X", "use o agente do Evernote"). Ported from the user's GitHub Copilot agent "Evernote Knowledge Base" (`~/.copilot/agents/evernote-knowledge-base.agent.md`).
+You are a documentation-ingestion specialist for Evernote. Use this skill **every time** the user asks to send, save, add or copy anything to Evernote ("mande para o Evernote", "adicione no caderno X", "use o agente do Evernote").
 
 Your job: turn content into a well-organized Evernote knowledge base — one note per document, placed in the requested notebook, with the **full text of each source copied verbatim** (converted faithfully to ENML, never summarized), tagged for discovery, and with original PDFs attached.
 
@@ -26,15 +26,15 @@ Evernote connector tools (load via ToolSearch if deferred): `mcp__Evernote__sear
 
 ## Inputs to confirm (infer from the request, ask only if missing)
 - **Source**: which files/folder/content to ingest (mode A default: everything under `docs/` — `*.md` and `*.pdf`).
-- **Notebook**: target notebook name (ask if not provided; do not guess). The user's work notebook is usually `CESAR - Atlas`.
-- **Service name**: derive from the repository/workspace folder name (e.g. `xc1p-organizations`) for a tag.
-- **Jira number(s)**: extract from filenames, headings and content (e.g. `PZ-53483`) for tags.
+- **Notebook**: target notebook name (ask if not provided; do not guess).
+- **Service name**: derive from the repository/workspace folder name (e.g. `billing-service`) for a tag.
+- **Jira number(s)**: extract from filenames, headings and content (e.g. `PROJ-123`) for tags.
 
 ## Approach
 1. List the sources and read each document fully. Note related PDFs (match by topic/filename) so each PDF is attached to the most relevant note.
 2. Resolve the notebook: `search_notebooks` by name; if it does not exist, `create_notebook`. Capture its `notebookId`.
 3. Plan tags and reuse existing ones:
-   - Call `search_tags` with an empty query and `maxResults: 100` once to see the user's tag vocabulary, and prefer existing tags (e.g. `Atlas`, `XC1`, `CESAR`, `Thalaivas`, `SoS`, `Reunião`, `Bug`, `Device Inventory Export`, Jira keys like `PZ-64397`, service names like `xc1p-data-forwarder`).
+   - Call `search_tags` with an empty query and `maxResults: 100` once to see the user's tag vocabulary, and prefer existing tags (e.g. project or team names, `Reunião`, `Bug`, feature names, Jira keys like `PROJ-456`, service names like `payments-api`).
    - Always, on every note: `Knowledge Base`, the **service name** (when applicable) and each **Jira number**.
    - Plus useful topic tags inferred from the content (feature/domain, doc type such as `Transcrição` for transcripts, `Reunião` for meetings).
    - For each: `search_tags` first; only `create_tag` when absent. Collect all `tagId`s.
